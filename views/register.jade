@@ -1,0 +1,49 @@
+doctype html
+html
+	head
+		title home
+		link(rel='stylesheet', href='stylesheets/login.css')
+	body
+		div(class='login')
+			h2 What are you talking about?
+			div(class='login-top')
+				h1 注册
+				//- form(id='upload' action='/register' method='post' role='form')
+				input(id='username' name='userName' type="text" placeholder="请输入用户名")
+				input(id='passA' name='password' type="password" placeholder="请输入密码")
+				input(id='passB' type="password" placeholder="请再次输入密码")
+				div(class='forgot')
+					input(class='upload' id='press' type='button' value='注册' onclick="upload()")
+			div(class="login-bottom")
+				h3 已有账号 &nbsp;
+					a(href="./login" id="toLogin") 请登录
+	script(src='/javascripts/jquery.min.js')
+	script.
+		function upload(){
+			if($("#passA").val() != $("#passB").val()||$("#passA").val()==''){
+				alert("两次输入的密码不相同或为空");
+				return;
+			}
+			var body={
+				'userName':$("#username").val(),
+				'password':$("#passA").val()
+			};
+			$.ajax({
+		        url: '/register',
+		        type: 'post',
+		        dataType: 'json',
+		        data: body,
+		        success: function(data) {
+		            if(data == '200'){
+		            	document.location = '/'
+		            } else if (data == '113'){
+		            	alert('该用户名已被占用');
+		            }
+		        },
+		        error: function(data) {
+		            alert('error');
+		        }
+
+		    });	
+
+		}

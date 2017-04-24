@@ -1,0 +1,104 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+	body
+		nav(class='navbar navbar-default navbar-fixed-top')
+			div(class='container-fluid')
+				div(class='navbar-header')
+					a(class='navbar-brand')
+						img(alt='Talking about' src='/images/T.png' height='20px' weight='20px')
+					a(class='navbar-brand')
+						span What are you talking about?
+				ul(class='nav navbar-nav navbar-right')
+					li
+						a(href='#' onclick='logout()')登出
+						form(id='logout' action='/logout' method='get' style='display:none')
+				div(class="collapse navbar-collapse")
+					ul(class='nav navbar-nav')
+						li(class='dropdown active')
+							a(href='#' class="dropdown-toggle" data-toggle="dropdown") 情感分析 
+								span(class='caret')
+							ul(class='dropdown-menu')
+								li
+									a(href='#sentiment-general' data-toggle='tab' ) 通用行业情感分析
+								li
+									a(href='#sentiment-news' data-toggle='tab' ) 新闻行业情感分析
+								li
+									a(href='#sentiment-weibo' data-toggle='tab' ) 微博行业情感分析
+						li
+							a(href='#keywords' data-toggle='tab') 关键词提取
+						li
+							a(href='#classify' data-toggle='tab') 新闻分类
+						li
+							a(href='#summary' data-toggle='tab') 新闻摘要
+		div(class=)
+		div(class='tab-content' id='gmTable' style='display:none')
+			div(class='tab-pane fade in active' id='sentiment-general') sentiment-general
+			div(class='tab-pane fade' id='sentiment-news') sentiment-news
+			div(class='tab-pane fade' id='sentiment-weibo') sentiment-weibo
+			div(class='tab-pane fade' id='keywords') keywords
+			div(class='tab-pane fade' id='classify') classify
+			div(class='tab-pane fade' id='summary') summary
+
+
+	script(src='/javascripts/jquery.min.js')
+	script(src='/javascripts/d3.js')
+	script(src='/bootstrap/js/bootstrap.min.js')
+	script(type='text/javascript').
+		var geted;
+		var classes=['体育','教育','财经','社会','娱乐','军事','国内','科技','互联网','房产','国际','女人','汽车','游戏'];
+		$.ajax({
+			url: '../getAnalysis',
+			type: 'get',
+			dataType: 'json',
+			success:function(data){
+				geted = data;
+				afterGetData();
+			},
+			error:function(data){
+				alert('error');
+			}
+		});
+		function afterGetData(){
+		console.log(geted);
+			var alldata = new Array();
+			var detail={
+				'gMood':'',
+				'wMood':'',
+				'nMood':'',
+				'keywords':'',
+				'sentences':'',
+				'summary':'',
+				'classify':''
+			};
+			var i = 0;
+			for(i = 0;i<geted.sentences.length;i++){
+			var detail={
+				'gMood':'',
+				'wMood':'',
+				'nMood':'',
+				'keywords':'',
+				'sentences':'',
+				'summary':'',
+				'classify':''
+			};
+				detail.sentences = geted.sentences[i];console.log(detail.sentences)
+				detail.summary = geted.summary[i];
+				detail.gMood = geted.gMood[i][0];
+				detail.wMood = geted.wMood[i][0];
+				detail.nMood = geted.nMood[i][0];
+				detail.classify = classes[geted.classify[i]];
+				detail.keywords = geted.keywords[i];
+				alldata.push(detail);
+			}
+			console.log(alldata);
+			var maxLength=100;
+			var table=d3.select("#gmTable");
+		}
+		
+		function logout(){
+			$("#logout").submit();
+		}

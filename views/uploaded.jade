@@ -1,0 +1,174 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+	body
+		nav(class='navbar navbar-default navbar-fixed-top')
+			div(class='container-fluid')
+				div(class='navbar-header')
+					a(class='navbar-brand')
+						img(alt='Talking about' src='/images/T.png' height='20px' weight='20px')
+					a(class='navbar-brand')
+						span What are you talking about?
+				ul(class='nav navbar-nav navbar-right')
+					li
+						a(href='#' onclick='logout()') 登出
+						form(id='logout' action='/logout' method='get' style='display:none')
+				div(class="collapse navbar-collapse")
+					ul(class='nav navbar-nav')
+						//- li(class='dropdown active')
+						//- 	a(href='#' class="dropdown-toggle" data-toggle="dropdown") 情感分析 
+						//- 		span(class='caret')
+						//- 	ul(class='dropdown-menu')
+						//- 		li
+						//- 			a(href='#sentiment-general' data-toggle='tab' ) 通用行业情感分析
+						//- 		li
+						//- 			a(href='#sentiment-news' data-toggle='tab' ) 新闻行业情感分析
+						//- 		li
+						//- 			a(href='#sentiment-weibo' data-toggle='tab' ) 微博行业情感分析
+						//- li
+						//- 	a(href='#keywords' data-toggle='tab') 关键词提取
+						//- li
+						//- 	a(href='#classify' data-toggle='tab') 新闻分类
+						//- li
+						//- 	a(href='#summary' data-toggle='tab') 新闻摘要
+						li(class='active')
+							a(href='#mySentence' data-toggle='tab') 上传过的文本
+						li
+							a(href='#' data-toggle='tab') 综合分析
+						li
+							a(href='./') 上传新文本
+						
+						
+		div(class='container max-container')
+			div(class='col-xs-12 col-sm-12 col-md-12 col-lg-12 shadow') 
+		div(class='tab-content' id='gmTable' style='display:none')
+			//- div(class='tab-pane fade in active' id='sentiment-general') sentiment-general
+			//- div(class='tab-pane fade' id='sentiment-news') sentiment-news
+			//- div(class='tab-pane fade' id='sentiment-weibo') sentiment-weibo
+			//- div(class='tab-pane fade' id='keywords') keywords
+			//- div(class='tab-pane fade' id='classify') classify
+			//- div(class='tab-pane fade' id='summary') summary
+
+			//- 除开nav最大的包裹者，包裹全屏
+			div(class='tab-pane fade in active col-xs-12 col-sm-12 col-md-12 col-lg-12' id='mySentence')
+				//- 中等包裹者，有背景色
+				div(class='tab-pane fade in active col-xs-12 col-sm-12 col-md-10 col-lg-8 col-md-offset-1 col-lg-offset-2 colorWrapper')
+					//- 内容包裹者，内容大小即为该div大小
+					div(class='col-xs-12 col-sm-10 col-md-8 col-lg-8 col-sm-offset-1 col-md-offset-2 col-lg-offset-2' id='msgs')
+
+			div(class='tab-pane fade' id='multi') 综合分析
+
+
+	script(src='/javascripts/jquery.min.js')
+	script(src='/javascripts/d3.js')
+	script(src='/bootstrap/js/bootstrap.min.js')
+	script(type='text/javascript').
+		//初始化页面，当分析结果尚未完成时，用黑屏覆盖屏幕
+		$(".shadow").height($(window).height()-50);
+		$(".shadow").css('line-height',$(window).height()-50+'px');
+		$(".shadow").css('font-size','50px');
+		$(".shadow").css('text-align','center');
+		$(".colorWrapper").height($(window).height()-100);
+
+
+		var t;//计时器
+		var analyzing=['Analyzing.','Analyzing..','Analyzing...'];
+		var i,j=0;
+		t = setTimeout('circle()',1000);
+		
+		//轮询检测分析是否完成
+		function circle(){
+			$.ajax({
+				url: '/isAnalyzed',
+				type: 'get',
+				dataType: 'json',
+				success:function(data){
+					console.log(data);
+					if(data == '0'){
+						$(".shadow").text(analyzing[j]);
+						if(j==2)
+							j=0;
+						else
+							j++;
+						t = setTimeout('circle()',1000);
+					}else{
+						$(".max-container").css('display', 'none');
+			            $("#gmTable").css('display', 'block');
+						clearTimeout(t);
+						getMsgs();
+					}
+				},
+				error:function(data){
+					alert('error');
+				}
+			});
+			
+		}
+
+
+		//classify分类结果数字所对应的内容
+		var classes=['体育','教育','财经','社会','娱乐','军事','国内','科技','互联网','房产','国际','女人','汽车','游戏'];
+
+		//获取信息
+		function getMsgs(){
+			var i = 0;
+			$.ajax({
+				url: '../getAnalysis',
+				type: 'get',
+				dataType: 'json',
+				success:function(data){
+					for(i = 0;i < data.length;i++){
+						var $newclicker = $('<div class="clickBox"><span class="clickSpan">删除</span></div>');
+						$newclicker.children().attr('msgid',data[i].msgID);
+						var $newMsg = $('<div class="well well-lg msgBox single" msgID="'+data[i].msgID+'"></div>');
+						$newMsg.text(data[i].sentence.replace("\\n", " \n "));
+						$("#msgs").append($newclicker);
+						$("#msgs").append($newMsg);
+					}
+				},
+				error:function(data){
+					alert('error');
+				}
+			});
+		}
+
+		//删除
+		$(document).on('click', '.clickSpan', function(e) {
+			$(this).css('display','none');
+			$(this).parent().css('display','none');
+			$(this).parent().next().css('display','none');
+			var $alert = $('<div class="alert alert-success" role="alert">删除成功！</div>');
+			$(this).parent().after($alert);
+			t = setTimeout(function(){
+				$alert.css('display','none');
+			},1000);
+			$.ajax({
+				url: '/deleteMsg',
+				type: 'post',
+				dataType: 'json',
+				data:{'id':$(this).attr('msgid')},
+				success:function(data){
+					console.log(data);
+				},
+				error:function(data){
+					alert('error');
+				}
+			});
+
+		});
+
+
+		$(document).on('click', '.single', function(e) {
+			location.href='/single?msgid='+$(this).attr('msgid');
+
+		});
+
+
+		
+		//登出
+		function logout(){
+			$("#logout").submit();
+		}

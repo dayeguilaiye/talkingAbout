@@ -1,0 +1,61 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+	body
+		nav(class='navbar navbar-default navbar-fixed-top')
+			div(class='container-fluid')
+				div(class='navbar-header')
+					a(class='navbar-brand')
+						img(alt='Talking about' src='/images/T.png' height='20px' weight='20px')
+					a(class='navbar-brand')
+						span What are you talking about?
+				ul(class='nav navbar-nav navbar-right')
+					li
+						a(href='#' onclick='logout()') 登出
+						form(id='logout' action='/logout' method='get' style='display:none')
+				div(class="collapse navbar-collapse")
+					ul(class='nav navbar-nav')
+						li
+							a(href='/uploaded' data-toggle='tab') 上传过的文本
+						li
+							a(href='#') 综合分析
+						li(class='active')
+							a(href='#') 上传新文本
+						li
+							a(href='#' onclick='reAnalyze()') 重新分析
+		div(class='container')
+			div(class='row col-xs-12 col-sm-12 col-md-12 col-lg-12 colorWrapper')
+				div(class='col-xs-12 col-sm-12 col-md-10 col-lg-10 col-md-offset-1 col-lg-offset-1 maxWrapper')
+					form(action='/upload' method='post' role='form')
+						div(class='form-group textbox')
+							lable(for='text' class='fontLable') 请输入待检测文本：
+							textarea(name='text' class='form-control' rows='6' placeholder='请在这里输入待检测的文本')
+						div(class='form-group')
+							button(class='col-xs-12 col-sm-6 col-md-4 col-lg-4 col-sm-offset-3 col-md-offset-4 col-lg-offset-4 btn btn-info' type='button' onclick='addtext()') 再添加一段文本
+						div(class='form-group uploader')
+							input(type='submit' value='上传' class='col-xs-12 col-sm-6 col-md-4 col-lg-4 col-sm-offset-3 col-md-offset-4 col-lg-offset-4 btn btn-success')
+	script(src='/javascripts/jquery.min.js')
+	script(src='/javascripts/up.js')
+	script.
+		$(".colorWrapper").height($(window).height()-100);
+		function logout(){
+			$("#logout").submit();
+		}
+
+		function reAnalyze(){
+			$.ajax({
+				url: '/reAnalyze',
+				type: 'get',
+				dataType: 'json',
+				success:function(data){
+					console.log(data);
+					console.log("success");
+				},
+				error:function(data){
+					alert('error');
+				}
+			});
+		}

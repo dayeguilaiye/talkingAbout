@@ -1,0 +1,274 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		style.
+			    ul.nav-tabs{
+			    	position:fixed;
+			        width: 140px;
+			        top:200px;
+			        left:20px;
+			        z-index: 5;
+			        border:0;
+			        font-size:18px;
+			    }
+			    ul.nav-tabs li{
+			        margin: 0;
+			    }
+			    ul.nav-tabs li:first-child{
+			    }
+			    ul.nav-tabs li a{
+			        margin: 0;
+			        padding: 8px 16px;
+			    }
+			    #leftScroll ul.nav-tabs li.active a,#leftScroll ul.nav-tabs li a:hover,#leftScroll ul.nav-tabs li:hover, #leftScroll ul.nav-tabs li.active a:hover{
+			        color: #fff;
+			        border-left: 2px solid blue;
+			        background-color:#000; 
+			        opacity:0.5;
+			        border-radius:0;
+			        border-top: 0;
+			    }
+			    ul.nav-tabs li:first-child a{
+			    }
+			    ul.nav-tabs li:last-child a{
+			    }
+			    ul.nav-tabs.affix{
+			        top: 200px; /* Set the top position of pinned element */
+			    }
+	body(data-spy="scroll" data-target="#leftScroll")
+		nav(class='navbar navbar-default navbar-fixed-top')
+			div(class='container-fluid')
+				div(class='navbar-header')
+					a(class='navbar-brand')
+						img(alt='Talking about' src='/images/T.png' height='20px' weight='20px')
+					a(class='navbar-brand')
+						span What are you talking about?
+				ul(class='nav navbar-nav navbar-right')
+					li
+						a(href='#' onclick='logout()') 登出
+						form(id='logout' action='/logout' method='get' style='display:none')
+				div(class="collapse navbar-collapse")
+					ul(class='nav navbar-nav')
+						li
+							a(href='/uploaded') 上传过的文本
+						li(class='active')
+							a(href='#') 单文本分析结果
+						
+		div(class="col-xs-3" id="leftScroll")
+			ul(class="nav nav-tabs nav-stacked" data-spy="affix" data-offset-top="125")
+				li(class="active")
+					a(href="#msg") 原文本
+				li
+					a(href="#mt") 情感分析
+				li
+					a(href="#smr") 文本摘要
+				li
+					a(href="#clsf") 文本类别
+				li
+					a(href="#kw") 关键词
+			//- 除开nav最大的包裹者，包裹全屏
+		div(class='tab-pane fade in active col-xs-12 col-sm-12 col-md-12 col-lg-12' id='mySentence')
+			//- 中等包裹者，有背景色
+			div(class='tab-pane fade in active col-xs-12 col-sm-12 col-md-12 col-lg-10 col-lg-offset-1 colorWrapper')
+
+				//- 内容包裹者，内容大小即为该div大小
+				div(class='col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 contentBox' id='msg')
+					div(class='smTitle')
+						span 原文本：
+					
+				div(class='col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 contentBox' id='mt')
+					div(class='smTitle')
+						span 情感分析：
+					div(class='options btn-group' role='group')
+						button(type="button" class="btn btn-default motionOption active" classify='general') 通用
+						button(type="button" class="btn btn-default motionOption" classify='news') 新闻
+						button(type="button" class="btn btn-default motionOption" classify='weibo') 微博
+					div(id='motionContainer')
+
+				div(class='col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 contentBox' id='smr')
+					div(class='smTitle')
+						span 文本摘要：
+
+				div(class='col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 contentBox' id='clsf')
+					div(class='smTitle')
+						span 文本类别：
+					ul(class='classifyList')
+						li 体育
+						li 教育
+						li 财经
+						li 社会
+						li 娱乐
+						li 军事
+						li 国内
+						li 科技
+						li 互联网
+						li 房产
+						li 国际
+						li 女人
+						li 汽车
+						li 游戏
+						li(class='scale')
+
+				div(class='col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 contentBox' id='kw')
+					div(class='smTitle')
+						span 关键词：
+					div(class='col-xs-6 col-sm-6 col-md-6 col-lg-6')
+						table(class='table table-bordered' id='keywordsTable1')
+							thead
+								tr
+									td 关键词
+									td 权重
+							tbody
+					div(class='col-xs-6 col-sm-6 col-md-6 col-lg-6')
+						table(class='table table-bordered' id='keywordsTable2')
+							thead
+								tr
+									td 关键词
+									td 权重
+							tbody
+
+			div(class='col-xs-12 col-sm-12 col-md-12 col-lg-12 bottomSpace')
+
+	script(src='/javascripts/jquery.min.js')
+	script(src='/javascripts/d3.js')
+	script(src='/javascripts/highcharts.js')
+	script(src='/bootstrap/js/bootstrap.min.js')
+	script(type='text/javascript').
+		var msgID = !{JSON.stringify(msgid)};
+		var msgData;
+		var classes=['体育','教育','财经','社会','娱乐','军事','国内','科技','互联网','房产','国际','女人','汽车','游戏'];
+
+		$.ajax({
+			url:'/getSingleMsg',
+			method:'post',
+			dataType:'json',
+			data:{msgid:!{JSON.stringify(msgid)}},
+			success:function(data){
+				//由于此页为单文本分析，因此只含有一个文本项，直接将数组转换为一个数据
+				msgData = data[0];
+
+				//展示原文本
+				addText(msgData.sentence,'#msg');
+				//通过饼状图展示情感倾向
+				motion(msgData.gMood*100);
+				//展示概述
+				addText(msgData.summary,'#smr');
+				//修改刻度显示新闻类别
+				changeScale(msgData.classify);
+				//添加关键词及权重
+				addKeywords(msgData.keywords);
+			},
+			error:function(err){
+				console.log(err);
+			}
+		});
+
+		function addText(sentence,box){
+			var $newMsg = $('<div class="well well-lg msgBox"></div>');
+			sentence = sentence.replace(/\\n/g, "<br />");
+			sentence = sentence.replace(/\n/g, "<br />");
+			$newMsg.append(sentence);
+			$(box).append($newMsg);
+		}
+
+		function motion(mood) {
+		    var chart = {
+		        plotBackgroundColor: null,
+		        plotBorderWidth: null,
+		        plotShadow: false
+		    };
+		    var title = {
+		        text: ''
+		    };
+		    var tooltip = {
+		        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+		    };
+		    var plotOptions = {
+		        pie: {
+		            allowPointSelect: true,
+		            cursor: 'pointer',
+		            dataLabels: {
+		                enabled: true,
+		                format: '<b>{point.name}%</b>: {point.percentage:.1f} %',
+		                style: {
+		                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                }
+		            }
+		        }
+		    };
+		    var series = [{
+		        type: 'pie',
+		        name: '感情指数',
+		        data: [
+		            ['正面', mood], {
+		                name: '负面',
+		                y: 100-mood,
+		                sliced: true,
+		                selected: true
+		            }
+		        ]
+		    }];
+
+		    var json = {};
+		    json.chart = chart;
+		    json.title = title;
+		    json.tooltip = tooltip;
+		    json.series = series;
+		    json.plotOptions = plotOptions;
+		    $('#motionContainer').highcharts(json);
+		}
+
+		function changeScale(classify){
+			$('.scale').css('left',classify*7+'%');
+			$('.scale').text(classes[classify]);
+		}
+
+		function addKeywords(keywords){
+			var i = 0;
+			var $tr,$td1,$td2;
+			keywords = eval("(" + keywords + ")");
+
+			for(i = 0;i < 5;i++){
+				if(i>=keywords.length)
+					break;
+				$tr = $('<tr></tr>');
+				$td1 = $('<td></td>');
+				$td2 = $('<td></td>');
+				console.log(keywords[i][1]);
+				$td1.text(keywords[i][1]);
+				$td2.text(keywords[i][0]);
+				$tr.append($td1);
+				$tr.append($td2);
+				$('#keywordsTable1 tbody').append($tr);
+			}
+			for(i = 5;i < 10;i++){
+				if(i>=keywords.length)
+					break;
+				$tr = $('<tr></tr>');
+				$td1 = $('<td></td>');
+				$td2 = $('<td></td>');
+				console.log(keywords[i][1]);
+				$td1.text(keywords[i][1]);
+				$td2.text(keywords[i][0]);
+				$tr.append($td1);
+				$tr.append($td2);
+				$('#keywordsTable2 tbody').append($tr);
+			}
+		}
+
+		//更改情感倾向判断方式
+		$('.motionOption').click(function(){
+			$(this).parent().children().removeClass('active');
+			$(this).addClass('active');
+			if($(this).attr('classify') == 'general'){
+				motion(msgData.gMood*100);
+			}else if($(this).attr('classify') == 'news'){
+				motion(msgData.nMood*100);
+			}else if($(this).attr('classify') == 'weibo'){
+				motion(msgData.wMood*100);
+			}
+			
+		});
