@@ -141,6 +141,17 @@ router.get('/reAnalyze', function(req, res, next) {
             sArray[i] = result[i].sentence;
         }
         analyse.analyse(sArray, 0);
+    });
+    res.send({ status: '200' });
+});
+
+//单文本重新分析
+router.get('/singleReAnalyze', function(req, res, next) {
+    var sArray = new Array();
+    var i = 0;
+    msgDao.msgById(req.query.msgid,function(result) {
+        sArray[0] = result[0].sentence;
+        analyse.analyse(sArray, 0);
 
     });
     res.send({ status: '200' });
@@ -169,7 +180,6 @@ router.get('/single', function(req, res, next) {
 //单文本分析结果
 router.post('/getSingleMsg', function(req, res, next) {
     msgDao.msgById(req.body.msgid, function(result) {
-        console.log(result[0].sentence);
         res.send(result);
     })
 });

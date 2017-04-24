@@ -40,6 +40,8 @@ html
 							a(href='#' data-toggle='tab') 综合分析
 						li
 							a(href='./') 上传新文本
+						li
+							a(href='#' onclick='reAnalyze()') 重新分析
 						
 						
 		div(class='container max-container')
@@ -73,12 +75,26 @@ html
 		$(".shadow").css('text-align','center');
 		$(".colorWrapper").height($(window).height()-100);
 
+		function reAnalyze(){
+			$.ajax({
+				url: '/reAnalyze',
+				type: 'get',
+				dataType: 'json',
+				success:function(data){
+					console.log("success");
+				},
+				error:function(data){
+					alert('error');
+				}
+			});
+		}
 
 		var t;//计时器
 		var analyzing=['Analyzing.','Analyzing..','Analyzing...'];
 		var i,j=0;
 		t = setTimeout('circle()',1000);
-		
+
+
 		//轮询检测分析是否完成
 		function circle(){
 			$.ajax({

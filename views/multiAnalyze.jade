@@ -56,8 +56,6 @@ html
 							a(href='/uploaded') 上传过的文本
 						li(class='active')
 							a(href='#') 单文本分析结果
-						li
-							a(href='#' onclick='singleReAnalyze()') 重新分析
 						
 		div(class="col-xs-3" id="leftScroll")
 			ul(class="nav nav-tabs nav-stacked" data-spy="affix" data-offset-top="125")
@@ -138,11 +136,11 @@ html
 						span 词云：
 					div(id='wordcloud')
 
+
 			div(class='col-xs-12 col-sm-12 col-md-12 col-lg-12 bottomSpace')
 
 	script(src='/javascripts/jquery.min.js')
 	script(src='/javascripts/d3.js')
-	script(src='/javascripts/wordcloud2.js')
 	script(src='/javascripts/highcharts.js')
 	script(src='/bootstrap/js/bootstrap.min.js')
 	script(type='text/javascript').
@@ -150,30 +148,15 @@ html
 		var msgData;
 		var classes=['体育','教育','财经','社会','娱乐','军事','国内','科技','互联网','房产','国际','女人','汽车','游戏'];
 
-
-		function singleReAnalyze(){
-			$.ajax({
-				url: '/singleReAnalyze?msgid='+msgData.msgID,
-				type: 'get',
-				dataType: 'json',
-				success:function(data){
-					console.log("success");
-				},
-				error:function(data){
-					alert('error');
-				}
-			});
-		}
-
 		$.ajax({
 			url:'/getSingleMsg',
 			method:'post',
 			dataType:'json',
 			data:{msgid:!{JSON.stringify(msgid)}},
 			success:function(data){
-				console.log(data)
 				//由于此页为单文本分析，因此只含有一个文本项，直接将数组转换为一个数据
 				msgData = data[0];
+
 				//展示原文本
 				addText(msgData.sentence,'#msg');
 				//通过饼状图展示情感倾向
@@ -184,7 +167,7 @@ html
 				changeScale(msgData.classify);
 				//添加关键词及权重
 				addKeywords(msgData.keywords);
-				//添加词云
+				//展示图云
 				addWordCloud(msgData.keywords);
 			},
 			error:function(err){
@@ -199,7 +182,6 @@ html
 			$newMsg.append(sentence);
 			$(box).append($newMsg);
 		}
-
 
 		function motion(mood) {
 		    var chart = {
@@ -264,6 +246,7 @@ html
 				$tr = $('<tr></tr>');
 				$td1 = $('<td></td>');
 				$td2 = $('<td></td>');
+				console.log(keywords[i][1]);
 				$td1.text(keywords[i][1]);
 				$td2.text(keywords[i][0]);
 				$tr.append($td1);
@@ -276,6 +259,7 @@ html
 				$tr = $('<tr></tr>');
 				$td1 = $('<td></td>');
 				$td2 = $('<td></td>');
+				console.log(keywords[i][1]);
 				$td1.text(keywords[i][1]);
 				$td2.text(keywords[i][0]);
 				$tr.append($td1);
@@ -287,22 +271,15 @@ html
 
 		function addWordCloud(keywords){
 			var i = 0;
-			var tmp;
-
-			keywords = JSON.parse(keywords);
+			var keyword = ['',0];
+			var newKeywords = new Array();
 			var minNum = keywords[0][0];
 			for(i in keywords){
-				tmp = keywords[i][1];
-				keywords[i][1] = keywords[i][0];
-				keywords[i][0] = tmp;
-				if(keywords[i][1]<minNum){
-					minNum = keywords[i][1];
-				}
+				keyword[0] = keywords[i][1];
+				keyword[1] = keywords[i][0];
+				newKeywords.push(keyword);
+
 			}
-			for(i in keywords){
-				keywords[i][1] = (keywords[i][1]*2-minNum)*200;
-			}
-			WordCloud(document.getElementById('wordcloud'), { list: keywords } );
 		}
 
 

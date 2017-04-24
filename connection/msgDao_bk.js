@@ -44,14 +44,6 @@ module.exports = {
             });
         });
     },
-    msgById: function(id,callback) {
-        pool.getConnection(function(err, connection) {
-            connection.query($sql.msgById,id, function(err, result) {
-                callback(result);
-                connection.release();
-            });
-        });
-    },
     deleteMsg: function(id) {
         pool.getConnection(function(err, connection) {
             connection.query($sql.deleteMsg,id, function(err, result) {
@@ -76,57 +68,51 @@ module.exports = {
             });
         });
     },
-    changew: function(sentence,answer,callback){
+    changew: function(sentence,answer){
         pool.getConnection(function(err, connection) {
             connection.query($sql.changew,[answer,sentence], function(err, result) {
                 connection.release();
-                console.log('w情感存储完毕--');
-                callback();
+            console.log('w情感存储完毕--');
             });
         });
     },
-    changen: function(sentence,answer,callback){
+    changen: function(sentence,answer){
         pool.getConnection(function(err, connection) {
             connection.query($sql.changen,[answer,sentence], function(err, result) {
                 connection.release();
-                console.log('n情感存储完毕--');
-                callback();
+            console.log('n情感存储完毕--');
             });
         });
     },
-    changeg: function(sentence,answer,callback){
+    changeg: function(sentence,answer){
         pool.getConnection(function(err, connection) {
             connection.query($sql.changeg,[answer,sentence], function(err, result) {
                 connection.release();
-                console.log('g情感存储完毕--');
-                callback();
+            console.log('g情感存储完毕--');
             });
         });
     },
-    changec: function(sentence,answer,callback){
+    changec: function(sentence,answer){
         pool.getConnection(function(err, connection) {
             connection.query($sql.changec,[answer,sentence], function(err, result) {
                 connection.release();
-                console.log('分类存储完毕--');
-                callback();
+            console.log('分类存储完毕--');
             });
         });
     },
-    changes: function(sentence,answer,callback){
+    changes: function(sentence,answer){
         pool.getConnection(function(err, connection) {
             connection.query($sql.changes,[answer,sentence], function(err, result) {
                 connection.release();
-                console.log('概述存储完毕--');
-                callback();
+            console.log('概述存储完毕--');
             });
         });
     },
-    changek: function(sentence,answer,callback){
+    changek: function(sentence,answer){
         pool.getConnection(function(err, connection) {
             connection.query($sql.changek,[answer,sentence], function(err, result) {
                 connection.release();
-                console.log('关键词存储完毕--');
-                callback();
+            console.log('关键词存储完毕--');
             });
         });
     }
