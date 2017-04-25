@@ -31,23 +31,23 @@ app.use(session({
 }));
 
 app.use(function(req, res, next) {
-    // if ((!req.session) || (!req.session.user)) {
-    //     console.log(req.url)
-    //     if (req.url == "/login" || req.url == "/register") {
-    //         next(); //如果请求的地址是登录则通过，进行下一个请求
-    //     } else {
-    //         console.log("有未经登录的请求");
-    //         res.redirect('/login');
-    //     }
-    // } else if (req.session.user) {
-    //     next();
-    // }
+    if ((!req.session) || (!req.session.user)) {
+        console.log(req.url)
+        if (req.url == "/login" || req.url == "/register") {
+            next(); //如果请求的地址是登录则通过，进行下一个请求
+        } else {
+            console.log("有未经登录的请求");
+            res.redirect('/login');
+        }
+    } else if (req.session.user) {
+        next();
+    }
 
 
     // 此处先关闭登录验证，方便调试
-    req.session.user = 'haha';
-    req.session.userId=11;
-    next();
+    // req.session.user = 'haha';
+    // req.session.userId=11;
+    // next();
 });
 
 app.use('/', index);
